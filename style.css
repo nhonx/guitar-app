@@ -106,24 +106,73 @@ body {
 
 /* --- OPTIMIZED CHORD BAR --- */
 #chord-bar {
-    width: calc(85px + var(--safe-right));
-    min-width: calc(85px + var(--safe-right));
+    /* Slightly wider to accommodate 2 columns if needed */
+    width: clamp(90px, 18vw, 140px);
+    min-width: 90px;
     height: 100%;
+    
     background: var(--sidebar-bg);
     border-left: 2px solid #333;
-    display: flex; flex-direction: column;
-    align-items: center;
     
-    /* DYNAMIC SPACING: Gap scales with screen height */
-    gap: 1.5vh; 
-    padding: 1.5vh 5px;
+    /* GRID LAYOUT FOR WRAPPING */
+    display: grid;
+    /* Auto-fill columns: buttons minimum 45px wide. 
+       This creates 1 column on narrow screens, 2 on wider ones. */
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    /* Rows adjust to content */
+    grid-auto-rows: min-content;
+    
+    gap: 8px; 
+    padding: 10px 5px;
     padding-right: calc(5px + var(--safe-right)); 
     
+    /* Allow scrolling */
     overflow-y: auto; 
     overflow-x: hidden;
     z-index: 20;
     box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    
+    /* Alignment within the grid cells */
+    align-content: start;
 }
+
+.chord-btn {
+    /* Remove fixed width, fill the grid cell */
+    width: 100%;
+    /* Keep aspect ratio square */
+    aspect-ratio: 1/1;
+    
+    border-radius: 50%;
+    border: 2px solid #444;
+    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+    color: #ddd; 
+    
+    /* Font size scales */
+    font-size: clamp(0.7rem, 2vh, 1rem);
+    font-weight: bold;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    transition: all 0.1s;
+    word-break: break-all; /* Prevent overflow for long names like C#m7 */
+}
+
+.chord-btn.active {
+    background: var(--active-color); color: #2d1b15;
+    border-color: var(--active-color); transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.4);
+    z-index: 2; /* Pop above neighbors */
+}
+
+.chord-btn.add-btn {
+    background: transparent; border: 1px dashed #555; color: #888;
+    font-size: 1.5rem;
+}
+
+/* ... [Rest of CSS (Settings Modal, Capo, etc) remains the same] ... */
+
+/* Update Library Grid in Modal for new Chords */
+.lib-btn.sharp { color: #ffab91; border-color: #5d4037; }
+.lib-btn.minor { font-size: 0.85rem; }
 
 .chord-btn {
     /* AUTO-SCALING SIZE */
@@ -166,7 +215,7 @@ body {
     overflow-y: auto;
 }
 
-.modal-content { width: 100%; max-width: 500px; padding-bottom: 40px; }
+.modal-content { width: 100%; max-width: 500px; padding-bottom: 40px; max-height: 100dvh; overflow-y: auto; }
 .modal-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
 .modal-title { color: #fff; font-size: 1.2rem; font-weight: bold; }
 .close-icon { font-size: 1.5rem; color: #888; cursor: pointer; }
@@ -199,4 +248,43 @@ body {
     border-radius: 30px; 
     font-weight: bold; 
     color: #000;
+}
+/* Capo Controls Styling */
+.capo-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.capo-btn {
+    width: 40px;
+    height: 40px;
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.capo-btn:active {
+    background: var(--active-color);
+    color: black;
+}
+
+#capo-display {
+    color: var(--active-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
 }

@@ -1,16 +1,17 @@
 /* --- CONFIG & DATA --- */
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
-let guitarWave = null; // We will store our custom wave shape here
+let guitarWave = null; 
 
-// Standard EADGBE Tuning frequencies
+// Standard Tuning Frequencies
 const baseFreqs = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
 
-// Tone Profiles (Adjusted for filter-based synthesis)
+let capo = 0; // 0 = No Capo, 1 = +1 semitone, etc.
+
 const toneProfiles = {
-    acoustic: { type: 'custom', filterStart: 3000, filterEnd: 0.1, duration: 2.0 }, // Bright steel string
-    electric: { type: 'sawtooth', filterStart: 2000, filterEnd: 0.5, duration: 3.5 }, // Warm sustain
-    distortion: { type: 'sawtooth', filterStart: 5000, filterEnd: 0.8, duration: 1.5 } // Harsh
+    acoustic: { type: 'custom', filterStart: 3000, filterEnd: 0.1, duration: 2.0 },
+    electric: { type: 'sawtooth', filterStart: 2000, filterEnd: 0.5, duration: 3.5 },
+    distortion: { type: 'sawtooth', filterStart: 5000, filterEnd: 0.8, duration: 1.5 } 
 };
 let currentTone = 'acoustic';
 
@@ -32,14 +33,11 @@ function initAudio() {
     if (!audioCtx) audioCtx = new AudioContext();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     
-    // Create the "Acoustic Guitar" Wave Table
-    // This adds harmonics to make it sound richer than a simple beep
     if(!guitarWave) {
         const real = new Float32Array(32);
         const imag = new Float32Array(32);
-        // Harmonic series for a plucked string (rich in odd harmonics, decaying intensity)
         for (let i = 1; i < 32; i++) {
-            imag[i] = i === 1 ? 1.0 : 0.6 / (i * i); // Amplitude drops rapidly for higher harmonics
+            imag[i] = i === 1 ? 1.0 : 0.6 / (i * i);
         }
         guitarWave = audioCtx.createPeriodicWave(real, imag);
     }
@@ -49,19 +47,20 @@ function playString(index, delay = 0) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime + delay;
 
-    // 1. Get Pitch
     const shape = chordLibrary[currentChord] || chordLibrary['C'];
-    if (shape[index] === -1) return; // Muted string
-    const freq = baseFreqs[index] * Math.pow(2, shape[index] / 12);
+    if (shape[index] === -1) return; // Muted
 
-    // 2. Setup Nodes
+    // PITCH CALCULATION:
+    // Base Frequency * 2 ^ ((Fret + Capo) / 12)
+    const totalFret = shape[index] + capo;
+    const freq = baseFreqs[index] * Math.pow(2, totalFret / 12);
+
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     const filterNode = audioCtx.createBiquadFilter();
 
     const profile = toneProfiles[currentTone];
 
-    // 3. Configure Oscillator (The Source)
     if (currentTone === 'acoustic' && guitarWave) {
         osc.setPeriodicWave(guitarWave);
     } else {
@@ -69,25 +68,18 @@ function playString(index, delay = 0) {
     }
     osc.frequency.setValueAtTime(freq, now);
 
-    // 4. Configure Filter (The Physics of damping)
-    // Real strings start bright (high filter) and get duller (low filter) as they ring out
     filterNode.type = 'lowpass';
-    filterNode.Q.value = 1; // Slight resonance
+    filterNode.Q.value = 1; 
     
-    // Filter Envelope
     const startFreq = currentTone === 'distortion' ? 6000 : 3000;
     filterNode.frequency.setValueAtTime(startFreq, now); 
-    // Decay brightness quickly to simulate wood absorption
     filterNode.frequency.exponentialRampToValueAtTime(freq + 100, now + profile.duration); 
 
-    // 5. Configure Gain (Volume Envelope)
     const volume = currentTone === 'distortion' ? 0.15 : 0.4;
     gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(volume, now + 0.01); // Fast attack (Pluck)
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + profile.duration); // Fade out
+    gainNode.gain.linearRampToValueAtTime(volume, now + 0.01); 
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + profile.duration); 
 
-    // 6. Connect & Start
-    // Distortion uses a waveshaper curve (optional enhancement, kept simple here via gain)
     osc.connect(filterNode);
     filterNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
@@ -95,7 +87,6 @@ function playString(index, delay = 0) {
     osc.start(now);
     osc.stop(now + profile.duration);
 
-    // 7. Visual Trigger
     setTimeout(() => animateString(index), delay * 1000);
 }
 
@@ -113,6 +104,21 @@ function animateString(index) {
 const chordBar = document.getElementById('chord-bar');
 const settingsModal = document.getElementById('settings-modal');
 const libraryGrid = document.getElementById('library-grid');
+const capoDisplay = document.getElementById('capo-display');
+
+// Capo Logic
+document.getElementById('capo-up').addEventListener('click', () => {
+    if(capo < 12) capo++;
+    updateCapoUI();
+});
+document.getElementById('capo-down').addEventListener('click', () => {
+    if(capo > 0) capo--;
+    updateCapoUI();
+});
+
+function updateCapoUI() {
+    capoDisplay.textContent = capo === 0 ? "0" : `+${capo}`;
+}
 
 function renderChordBar() {
     chordBar.innerHTML = ''; 
@@ -161,6 +167,7 @@ function renderSettings() {
         libraryGrid.appendChild(btn);
     });
     updateToneUI();
+    updateCapoUI();
 }
 
 function setTone(tone) {
@@ -222,10 +229,7 @@ function handleMove(e) {
             }
         });
 
-        // Sort by progress to handle fast swipe order correctly
         hits.sort((a,b) => a.progress - b.progress);
-        
-        // Slightly delay each string to prevent "Audio Crash" on fast swipes
         hits.forEach(h => playString(h.idx, h.progress * 0.04));
         
         activeTouches[t.identifier] = currY;
@@ -237,7 +241,6 @@ stringsContainer.addEventListener('touchstart', (e) => {
     if(stringGeom.length === 0) updateGeom();
     Array.from(e.changedTouches).forEach(t => {
         activeTouches[t.identifier] = t.clientY;
-        // Check for direct tap
         stringGeom.forEach((str, idx) => {
             if (Math.abs(t.clientY - str.center) < 30) playString(idx);
         });

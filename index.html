@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pocket Guitar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pocket Guitar PWA</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d1b15">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Guitar">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <div id="rotate-message">
@@ -19,13 +24,11 @@
     <div id="start-overlay">
         <h1 class="app-title">Pocket Guitar</h1>
         <p class="subtitle">Select tone</p>
-
         <div class="sound-options overlay-options">
             <button class="sound-btn selected" data-tone="acoustic">Acoustic</button>
             <button class="sound-btn" data-tone="electric">Clean</button>
             <button class="sound-btn" data-tone="distortion">Rock</button>
         </div>
-
         <button id="start-btn">PLAY</button>
     </div>
 
@@ -34,6 +37,13 @@
             <div class="modal-header">
                 <span class="modal-title">Settings</span>
                 <span class="close-icon" id="close-settings">✕</span>
+            </div>
+            
+            <div class="setting-label">Capo (Key Shift)</div>
+            <div class="capo-controls">
+                <button id="capo-down" class="capo-btn">-</button>
+                <span id="capo-display">0</span>
+                <button id="capo-up" class="capo-btn">+</button>
             </div>
 
             <div class="setting-label">Tone</div>
@@ -44,43 +54,38 @@
             </div>
 
             <div class="setting-label">Chord Library</div>
-            <div class="chord-grid" id="library-grid">
-            </div>
+            <div class="chord-grid" id="library-grid"></div>
         </div>
     </div>
 
     <div id="main-app">
         <div id="settings-trigger">⚙</div>
-
+        
         <div id="guitar-body">
             <div id="sound-hole"></div>
             <div id="strings-container">
-                <div class="string s0">
-                    <div class="string-line"></div>
-                </div>
-                <div class="string s1">
-                    <div class="string-line"></div>
-                </div>
-                <div class="string s2">
-                    <div class="string-line"></div>
-                </div>
-                <div class="string s3">
-                    <div class="string-line"></div>
-                </div>
-                <div class="string s4">
-                    <div class="string-line"></div>
-                </div>
-                <div class="string s5">
-                    <div class="string-line"></div>
-                </div>
+                <div class="string s0" data-index="0"><div class="string-line"></div></div>
+                <div class="string s1" data-index="1"><div class="string-line"></div></div>
+                <div class="string s2" data-index="2"><div class="string-line"></div></div>
+                <div class="string s3" data-index="3"><div class="string-line"></div></div>
+                <div class="string s4" data-index="4"><div class="string-line"></div></div>
+                <div class="string s5" data-index="5"><div class="string-line"></div></div>
             </div>
         </div>
-
-        <div id="chord-bar">
-        </div>
+        
+        <div id="chord-bar"></div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <script type="module" src="events.js"></script>
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed', err));
+            });
+        }
+    </script>
+</body>
 </html>
