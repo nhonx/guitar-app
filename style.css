@@ -107,7 +107,7 @@ body {
 /* --- OPTIMIZED CHORD BAR --- */
 #chord-bar {
     /* Slightly wider to accommodate 2 columns if needed */
-    width: clamp(90px, 18vw, 140px);
+    width: 140px;/*clamp(90px, 18vw, 140px);*/
     min-width: 90px;
     height: 100%;
     
