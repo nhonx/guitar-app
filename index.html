@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pocket Guitar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div id="rotate-message">
+        <div class="rotate-icon">⟳</div>
+        <h3>Please Rotate to Landscape</h3>
+    </div>
+
+    <div id="start-overlay">
+        <h1 class="app-title">Pocket Guitar</h1>
+        <p class="subtitle">Select tone</p>
+
+        <div class="sound-options overlay-options">
+            <button class="sound-btn selected" data-tone="acoustic">Acoustic</button>
+            <button class="sound-btn" data-tone="electric">Clean</button>
+            <button class="sound-btn" data-tone="distortion">Rock</button>
+        </div>
+
+        <button id="start-btn">PLAY</button>
+    </div>
+
+    <div id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Settings</span>
+                <span class="close-icon" id="close-settings">✕</span>
+            </div>
+
+            <div class="setting-label">Tone</div>
+            <div class="sound-options">
+                <button class="sound-btn selected" data-tone="acoustic">Acoustic</button>
+                <button class="sound-btn" data-tone="electric">Clean</button>
+                <button class="sound-btn" data-tone="distortion">Rock</button>
+            </div>
+
+            <div class="setting-label">Chord Library</div>
+            <div class="chord-grid" id="library-grid">
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <div id="settings-trigger">⚙</div>
+
+        <div id="guitar-body">
+            <div id="sound-hole"></div>
+            <div id="strings-container">
+                <div class="string s0">
+                    <div class="string-line"></div>
+                </div>
+                <div class="string s1">
+                    <div class="string-line"></div>
+                </div>
+                <div class="string s2">
+                    <div class="string-line"></div>
+                </div>
+                <div class="string s3">
+                    <div class="string-line"></div>
+                </div>
+                <div class="string s4">
+                    <div class="string-line"></div>
+                </div>
+                <div class="string s5">
+                    <div class="string-line"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chord-bar">
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
