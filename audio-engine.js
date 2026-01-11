@@ -7,9 +7,22 @@ let guitarWave = null;
 const baseFreqs = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
 
 const toneProfiles = {
-    acoustic: { type: 'custom', filterStart: 3000, filterEnd: 0.1, duration: 2.0 },
-    electric: { type: 'sawtooth', filterStart: 2000, filterEnd: 0.5, duration: 3.5 },
-    distortion: { type: 'sawtooth', filterStart: 5000, filterEnd: 0.8, duration: 1.5 } 
+    // BOOSTED GAIN: Increased from ~0.4 to 0.6 to match Rock volume
+    acoustic: { 
+        type: 'custom', 
+        filterStart: 3000, 
+        filterEnd: 0.1, 
+        duration: 2.0, 
+        gain: 0.6 
+    },
+    // Removed 'electric' (Clean) as requested
+    distortion: { 
+        type: 'sawtooth', 
+        filterStart: 6000, 
+        filterEnd: 100, // Lower end frequency to make it "crunch" more 
+        duration: 1.5, 
+        gain: 0.15 // Sawtooth is naturally loud, so gain stays lower
+    } 
 };
 
 export function initAudio() {
@@ -42,7 +55,9 @@ export function playString(index, delay = 0) {
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     const filterNode = audioCtx.createBiquadFilter();
-    const profile = toneProfiles[state.currentTone];
+    
+    // Safety fallback if tone doesn't exist (e.g. if user had 'clean' selected before reload)
+    const profile = toneProfiles[state.currentTone] || toneProfiles['acoustic'];
 
     // 3. Configure Sound
     if (state.currentTone === 'acoustic' && guitarWave) {
@@ -55,14 +70,14 @@ export function playString(index, delay = 0) {
     // Filter (Physics)
     filterNode.type = 'lowpass';
     filterNode.Q.value = 1;
-    const startFreq = state.currentTone === 'distortion' ? 6000 : 3000;
-    filterNode.frequency.setValueAtTime(startFreq, now); 
-    filterNode.frequency.exponentialRampToValueAtTime(freq + 100, now + profile.duration); 
+    filterNode.frequency.setValueAtTime(profile.filterStart, now); 
+    // Sweep filter down to create "pluck" sound
+    filterNode.frequency.exponentialRampToValueAtTime(profile.filterEnd + freq, now + profile.duration); 
 
-    // Gain (Volume)
-    const volume = state.currentTone === 'distortion' ? 0.15 : 0.4;
+    // Gain (Volume) - NOW USES PROFILE DATA
     gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(volume, now + 0.01); 
+    // Fast attack to profile.gain
+    gainNode.gain.linearRampToValueAtTime(profile.gain, now + 0.015); 
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + profile.duration); 
 
     // 4. Connect
