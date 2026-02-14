@@ -207,7 +207,9 @@ body {
 
 .action-btn { width: 100%; padding: 12px; background: #333; color: var(--active-color); border: 1px solid #555; border-radius: 8px; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
 #preset-list { display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; }
-.preset-item { display: flex; justify-content: space-between; align-items: center; background: #222; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; }
+.preset-item { display: flex; justify-content: space-between; align-items: center; background: #222; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; transition: background 0.2s; }
+.preset-item:hover { background: #2a2a2a; border-color: #555; }
+.preset-item:active { background: #333; }
 .preset-name { color: #ccc; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; margin-right: 10px; cursor: pointer; }
 .preset-del { background: transparent; border: none; color: #666; font-size: 1.2rem; line-height: 1; padding: 0 5px; }
 .capo-controls { display: flex; justify-content: center; gap: 20px; background: #222; padding: 10px; border-radius: 8px; border: 1px solid #444; }
